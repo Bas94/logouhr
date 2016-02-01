@@ -30,3 +30,16 @@
 
 # Debug files
 *.dSYM/
+
+# qt project files
+*.config
+*.user
+*.includes
+*.creator
+*.files
+
+# build dependencies
+dependencies/*
+
+# build directory
+build.nodemcu
