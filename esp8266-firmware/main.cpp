@@ -3,10 +3,13 @@
 #include "LEDStripe.h"
 #include "TCPServer.h"
 #include "Wifi.h"
+#include "WifiLogin.h"
+
 #include "StringOperations.h"
 
-const char* ssid = "SSID";
-const char* password = "PASSWORD";
+
+const char* ssid = SSID;
+const char* password = PASSWORD;
 const int tcpPort = 1337;
 
 TCPServer server( tcpPort );

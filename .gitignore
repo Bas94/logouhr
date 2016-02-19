@@ -40,6 +40,10 @@
 
 # build dependencies
 dependencies/*
+esptool/*
+
+# secret password file
+*WifiLogin.h
 
 # build directory
 build.nodemcu
