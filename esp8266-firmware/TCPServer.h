@@ -9,6 +9,8 @@ class TCPServer
 public:
     TCPServer( int port );
 
+    bool start();
+
     //! return true if any client is currently connected to this TCPSocket
     bool clientConnected();
 

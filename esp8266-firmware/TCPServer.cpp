@@ -5,31 +5,32 @@ TCPServer::TCPServer( int port )
     , m_server( port )
     , m_buffer( "" )
 {
-    m_server.begin();
-    m_server.setNoDelay(true);
-    serviceLoop();
 }
 
 void TCPServer::serviceLoop()
 {
-    if( !clientConnected() )
-    {
-        m_client = m_server.available();
-    }
-
     if( clientConnected() )
     {
         uint16_t numBytes = m_client.available();
         for( uint16_t i = 0; i < numBytes; ++i )
         {
-            m_buffer += m_client.read();
+            m_buffer += String( static_cast<char>( m_client.read() ) );
         }
     }
 }
 
+bool TCPServer::start()
+{
+    m_server.begin();
+    m_server.setNoDelay(true);
+    serviceLoop();
+}
+
 bool TCPServer::clientConnected()
 {
-    serviceLoop();
+    if( !m_client || !m_client.connected() )
+        m_client = m_server.available();
+
     return m_client && m_client.connected();
 }
 
