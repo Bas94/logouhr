@@ -58,6 +58,43 @@ void LEDStripe::setHSVLineColor( int start, int end, int h, int s, int v )
     setRGBLineColor( start, end, r, g, b );
 }
 
+void LEDStripe::addRGBColor( int i, int r, int g, int b )
+{
+    uint32_t col = m_stripe.Color( r, g, b );
+    m_stripe.setPixelColor( i, col );
+}
+
+void LEDStripe::addHSVColor( int i, int h, int s, int v )
+{
+    uint8_t r, g, b;
+    HSVtoRGB( h, s, v, r, g, b );
+    addRGBColor( i , r, g, b );
+}
+
+void LEDStripe::addFullRGBColor( int r, int g, int b )
+{
+    uint32_t col = m_stripe.Color( r, g, b );
+    for( int i = 0; i < m_numPixels; ++i )
+        m_stripe.setPixelColor( i, col );
+}
+
+void LEDStripe::addFullHSVColor( int h, int s, int v )
+{
+    uint8_t r, g, b;
+    HSVtoRGB( h, s, v, r, g, b );
+    addFullRGBColor( r, g, b );
+}
+
+void LEDStripe::refresh()
+{
+    m_stripe.show();
+}
+
+int LEDStripe::getNumberOfPixels()
+{
+    return m_numPixels;
+}
+
 void LEDStripe::HSVtoRGB( uint16_t h, uint8_t s, uint8_t v, uint8_t& red, uint8_t& green, uint8_t& blue )
 {
     h=h%360;

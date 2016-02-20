@@ -4,6 +4,7 @@
 #include "TCPServer.h"
 #include "Wifi.h"
 #include "WifiLogin.h"
+#include "CommandInterpreter.h"
 
 #include "StringOperations.h"
 
@@ -14,11 +15,16 @@ const int tcpPort = 1337;
 
 TCPServer server( tcpPort );
 Wifi wifi;
-LEDStripe stripe( 5, 300 );
+LEDStripe stripeOuter( 5, 147 );
+LEDStripe stripeInner( 4, 147 );
+
+CommandInterpreter interpreter( stripeInner,
+                                stripeOuter );
 
 void setup()
 {
-  stripe.setFullRGBColor( 80, 80, 80 );
+  stripeOuter.setFullRGBColor( 80, 0, 0 );
+  stripeInner.setFullRGBColor( 0, 0, 80 );
   delay( 500 );
   Serial.begin(115200);
   if( !wifi.connectToWLAN( ssid, password, 20 ) )
@@ -47,9 +53,7 @@ void loop()
             String command = server.getDataUntilCharacter( '\n' );
             if( command.length() != 0 )
             {
-                int red, green, blue;
-                strOp::parseInput( command, red, green, blue );
-                stripe.setFullRGBColor( red, green, blue );
+                interpreter.interpret( command );
                 // empty buffer
                 server.readData();
             }
@@ -63,4 +67,3 @@ void loop()
         Serial.println( tcpPort );
     }
 }
-

@@ -15,6 +15,19 @@ namespace strOp
         str1 = str1.substring( 0, indx );
     }
 
+    void split( String const & input, String& str1, String& str2, char splitChar )
+    {
+        String cpy = input;
+        int indx = cpy.indexOf( splitChar );
+        if( indx < 0 )
+        {
+            str1 = "";
+            str2 = "";
+            return;
+        }
+        str2 = cpy.substring( indx+1, cpy.length() );
+        str1 = cpy.substring( 0, indx );
+    }
 
     void parseInput( String input, int& red, int& green, int& blue )
     {
