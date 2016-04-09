@@ -3,16 +3,19 @@
 #include "StringOperations.h"
 
 CommandInterpreter::CommandInterpreter( LEDStripe& LEDStripeInner,
-                                        LEDStripe& LEDStripeOuter )
+                                        LEDStripe& LEDStripeOuter,
+                                        int minimalOutput )
     : m_LEDStripeInner( LEDStripeInner )
     , m_LEDStripeOuter( LEDStripeOuter )
     , m_mode( LogoModeClock )
+    , m_stripeType( StripeOuter )
     , m_hour( 0 )
     , m_minute( 0 )
     , m_second( 0 )
     , m_hourWidth( 2 )
     , m_minuteWidth( 2 )
     , m_secondWidth( 2 )
+    , m_minimalOutput( minimalOutput )
 {
     m_hourColor.r = 0;
     m_hourColor.g = 0;
@@ -25,6 +28,14 @@ CommandInterpreter::CommandInterpreter( LEDStripe& LEDStripeInner,
     m_secondColor.r = 80;
     m_secondColor.g = 0;
     m_secondColor.b = 0;
+
+    m_backgroundColorOuter.r = 80;
+    m_backgroundColorOuter.g = 80;
+    m_backgroundColorOuter.b = 80;
+
+    m_backgroundColorInner.r = 80;
+    m_backgroundColorInner.g = 80;
+    m_backgroundColorInner.b = 80;
 }
 
 CommandInterpreter::~CommandInterpreter()
@@ -37,6 +48,8 @@ CommandInterpreter::~CommandInterpreter()
  *
  * Protocol:
  * mode generic/clock
+ *
+ * CLOCK:
  * time HH MM SS\n
  * clock HH MM SS\n
  * hourColorRGB R G B\n
@@ -48,23 +61,43 @@ CommandInterpreter::~CommandInterpreter()
  * hourWidth W\n
  * minuteWidth W\n
  * secondWidth W\n
+ *
+ * backgroundRGBColor R G B\n
+ * backgroundHSVColor H S V\n
+ *
+ * GENERIC:
+ * setStripe inner/outer\n
+ * fullRGBColor R G B\n
+ * fullHSVColor H S V\n
+ * fillRGBRow start end R G B\n
+ * fillHSVRow start end H S V\n
+ * setRGBPixel pos R G B\n
+ * setHSVPixel pos H S V\n
+ *
  */
+
 void CommandInterpreter::interpret( String const & command )
 {
-    String rest = command;
-    String type;
-    strOp::split( rest, type, rest, ' ' );
-    if( type.equals( "mode" ) ) { setMode( rest ); }
-    else if( type.equals( "time" ) ) { setTime( rest ); }
-    else if( type.equals( "clock" ) ) { setTime( rest ); }
-    else if( type.equals( "hourColorRGB" ) ) { setHourRGBColor( rest ); }
+    String rest, type;
+    strOp::split( command, type, rest, ' ' );
+    if( type.equals( "mode" ) )                { setMode( rest ); }
+    else if( type.equals( "time" ) )           { setTime( rest ); }
+    else if( type.equals( "clock" ) )          { setTime( rest ); }
+    else if( type.equals( "hourColorRGB" ) )   { setHourRGBColor( rest ); }
     else if( type.equals( "minuteColorRGB" ) ) { setMinuteRGBColor( rest ); }
     else if( type.equals( "secondColorRGB" ) ) { setSecondRGBColor( rest ); }
-    else if( type.equals( "hourColorHSV" ) ) { setHourHSVColor( rest ); }
+    else if( type.equals( "hourColorHSV" ) )   { setHourHSVColor( rest ); }
     else if( type.equals( "minuteColorHSV" ) ) { setMinuteHSVColor( rest ); }
     else if( type.equals( "secondColorHSV" ) ) { setSecondHSVColor( rest ); }
-    else if( type.equals( "fullRGBColor" ) ) { setFullRGBColor( rest ); }
-
+    else if( type.equals( "backgroundRGBColor" ) ) { setBackgroundRGBColor( rest ); }
+    else if( type.equals( "backgroundHSVColor" ) ) { setBackgroundHSVColor( rest ); }
+    else if( type.equals( "setStripe" ) )      { setStripe( rest ); }
+    else if( type.equals( "fullRGBColor" ) )   { setFullRGBColor( rest ); }
+    else if( type.equals( "fullHSVColor" ) )   { setFullHSVColor( rest ); }
+    else if( type.equals( "fillRGBRow" ) )     { fillRGBRow( rest ); }
+    else if( type.equals( "fillHSVRow" ) )     { fillHSVRow( rest ); }
+    else if( type.equals( "setRGBPixel" ) )    { setRGBPixel( rest ); }
+    else if( type.equals( "setHSVPixel" ) )    { setHSVPixel( rest ); }
     updatePixels();
 }
 
@@ -96,8 +129,8 @@ void CommandInterpreter::updatePixels()
 {
     if( m_mode == LogoModeClock )
     {
-        m_LEDStripeInner.addFullRGBColor( 30, 30, 30 );
-        m_LEDStripeOuter.addFullRGBColor( 30, 30, 30 );
+        m_LEDStripeInner.addFullRGBColor( m_backgroundColorInner.r, m_backgroundColorInner.g, m_backgroundColorInner.b );
+        m_LEDStripeOuter.addFullRGBColor( m_backgroundColorOuter.r, m_backgroundColorOuter.g, m_backgroundColorOuter.b );
 
         // hours
         clockHand( m_LEDStripeInner,
@@ -123,7 +156,6 @@ void CommandInterpreter::updatePixels()
     }
     else if( m_mode == LogoModeGeneric )
     {
-
     }
 }
 
@@ -140,6 +172,23 @@ void CommandInterpreter::parseColorRGB( String& arguments, Color& color )
         color.r = r.toInt();
         color.g = g.toInt();
         color.b = b.toInt();
+    }
+
+    int colorSum = color.r + color.g + color.b;
+    if( colorSum < m_minimalOutput )
+    {
+       if( colorSum == 0 )
+       {
+           color.r = m_minimalOutput / 3 + 1;
+           color.g = m_minimalOutput / 3 + 1;
+           color.b = m_minimalOutput / 3 + 1;
+       }
+       else
+       {
+           color.r = color.r * m_minimalOutput / colorSum;
+           color.g = color.g * m_minimalOutput / colorSum;
+           color.b = color.b * m_minimalOutput / colorSum;
+       }
     }
 }
 
@@ -220,10 +269,155 @@ void CommandInterpreter::setSecondHSVColor( String& arguments )
     parseColorHSV( arguments, m_secondColor );
 }
 
+void CommandInterpreter::setBackgroundRGBColor( String& arguments )
+{
+    Color color;
+    parseColorRGB( arguments, color );
+    if( m_stripeType == StripeInner )
+    {
+        m_backgroundColorInner = color;
+    }
+    else if( m_stripeType == StripeOuter )
+    {
+        m_backgroundColorOuter = color;
+    }
+}
+
+void CommandInterpreter::setBackgroundHSVColor( String& arguments )
+{
+    Color color;
+    parseColorHSV( arguments, color );
+    if( m_stripeType == StripeInner )
+    {
+        m_backgroundColorInner = color;
+    }
+    else if( m_stripeType == StripeOuter )
+    {
+        m_backgroundColorOuter = color;
+    }
+}
+
 void CommandInterpreter::setFullRGBColor( String& arguments )
 {
     Color col;
     parseColorRGB( arguments, col );
-    m_LEDStripeInner.setFullRGBColor( col.r, col.g, col.b );
-    m_LEDStripeOuter.setFullRGBColor( col.r, col.g, col.b );
+    if( m_stripeType == StripeInner )
+    {
+        m_LEDStripeInner.setFullRGBColor( col.r, col.g, col.b );
+    }
+    else if( m_stripeType == StripeOuter )
+    {
+        m_LEDStripeOuter.setFullRGBColor( col.r, col.g, col.b );
+    }
+}
+
+void CommandInterpreter::setFullHSVColor( String& arguments )
+{
+    Color col;
+    parseColorHSV( arguments, col );
+    if( m_stripeType == StripeInner )
+    {
+        m_LEDStripeInner.setFullRGBColor( col.r, col.g, col.b );
+    }
+    else if( m_stripeType == StripeOuter )
+    {
+        m_LEDStripeOuter.setFullRGBColor( col.r, col.g, col.b );
+    }
+}
+
+void CommandInterpreter::setStripe( String& arguments )
+{
+    if( arguments == "outer" )
+    {
+        m_stripeType = StripeOuter;
+    }
+
+    if( arguments == "inner" )
+    {
+        m_stripeType = StripeInner;
+    }
+}
+
+void CommandInterpreter::fillRGBRow( String& arguments )
+{
+    String start, end;
+    Color col;
+    strOp::split( arguments, start, arguments, ' ' );
+    strOp::split( arguments, end, arguments, ' ' );
+    parseColorRGB( arguments, col );
+    if( start.length() > 0 && end.length() > 0 )
+    {
+        int startIndex = start.toInt();
+        int endIndex = end.toInt();
+        if( m_stripeType == StripeInner )
+        {
+            m_LEDStripeInner.setRGBLineColor( startIndex, endIndex, col.r, col.g, col.b );
+        }
+        else if( m_stripeType == StripeOuter )
+        {
+            m_LEDStripeOuter.setRGBLineColor( startIndex, endIndex, col.r, col.g, col.b );
+        }
+    }
+}
+
+void CommandInterpreter::fillHSVRow( String& arguments )
+{
+    String start, end;
+    Color col;
+    strOp::split( arguments, start, arguments, ' ' );
+    strOp::split( arguments, end, arguments, ' ' );
+    parseColorHSV( arguments, col );
+    if( start.length() > 0 && end.length() > 0 )
+    {
+        int startIndex = start.toInt();
+        int endIndex = end.toInt();
+        if( m_stripeType == StripeInner )
+        {
+            m_LEDStripeInner.setRGBLineColor( startIndex, endIndex, col.r, col.g, col.b );
+        }
+        else if( m_stripeType == StripeOuter )
+        {
+            m_LEDStripeOuter.setRGBLineColor( startIndex, endIndex, col.r, col.g, col.b );
+        }
+    }
+}
+
+void CommandInterpreter::setRGBPixel( String& arguments )
+{
+    String indexStr;
+    Color col;
+    strOp::split( arguments, indexStr, arguments, ' ' );
+    parseColorRGB( arguments, col );
+    if( indexStr.length() > 0 )
+    {
+        int index = indexStr.toInt();
+        if( m_stripeType == StripeInner )
+        {
+            m_LEDStripeInner.setRGBColor( index, col.r, col.g, col.b );
+        }
+        else if( m_stripeType == StripeOuter )
+        {
+            m_LEDStripeOuter.setRGBColor( index, col.r, col.g, col.b );
+        }
+    }
+}
+
+void CommandInterpreter::setHSVPixel( String& arguments )
+{
+    String indexStr;
+    Color col;
+    strOp::split( arguments, indexStr, arguments, ' ' );
+    parseColorHSV( arguments, col );
+    if( indexStr.length() > 0 )
+    {
+        int index = indexStr.toInt();
+        if( m_stripeType == StripeInner )
+        {
+            m_LEDStripeInner.setRGBColor( index, col.r, col.g, col.b );
+        }
+        else if( m_stripeType == StripeOuter )
+        {
+            m_LEDStripeOuter.setRGBColor( index, col.r, col.g, col.b );
+        }
+    }
 }

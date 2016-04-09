@@ -30,7 +30,8 @@ class CommandInterpreter
 {
 public:
     CommandInterpreter( LEDStripe& LEDStripeInner,
-                        LEDStripe& LEDStripeOuter );
+                        LEDStripe& LEDStripeOuter,
+                        int minimalOutput = 30 );
     ~CommandInterpreter();
 
     void interpret( String const & command );
@@ -52,8 +53,19 @@ private:
     void setHourHSVColor( String& arguments );
     void setMinuteHSVColor( String& arguments );
     void setSecondHSVColor( String& arguments );
+    void setBackgroundRGBColor( String& arguments );
+    void setBackgroundHSVColor( String& arguments );
 
     void setFullRGBColor( String& arguments );
+    void setFullHSVColor( String& arguments );
+
+    void fillRGBRow( String& arguments );
+    void fillHSVRow( String& arguments );
+
+    void setRGBPixel( String& arguments );
+    void setHSVPixel( String& arguments );
+
+    void setStripe( String& arguments );
 
     enum LogoMode
     {
@@ -61,9 +73,16 @@ private:
         LogoModeClock
     };
 
+    enum StripeType
+    {
+        StripeInner,
+        StripeOuter
+    };
+
     LEDStripe& m_LEDStripeInner;
     LEDStripe& m_LEDStripeOuter;
     LogoMode m_mode;
+    StripeType m_stripeType;
 
     int m_hour;
     int m_minute;
@@ -73,9 +92,14 @@ private:
     Color m_minuteColor;
     Color m_secondColor;
 
+    Color m_backgroundColorInner;
+    Color m_backgroundColorOuter;
+
     int m_hourWidth;
     int m_minuteWidth;
     int m_secondWidth;
+
+    int m_minimalOutput;
 };
 
 #endif // __COMMAND_INTERPRETER_H__
