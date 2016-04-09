@@ -34,6 +34,7 @@
 # qt project files
 *.config
 *.user
+*.user*
 *.includes
 *.creator
 *.files
