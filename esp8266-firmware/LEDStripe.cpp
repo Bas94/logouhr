@@ -1,12 +1,17 @@
 #include "LEDStripe.h"
 
-LEDStripe::LEDStripe( int pin, int numPixels )
+#include <EEPROM.h>
+
+LEDStripe::LEDStripe(int pin, int numPixels , int saveLoadOffset)
     : m_pin( pin )
     , m_numPixels( numPixels )
     , m_stripe( m_numPixels, m_pin, NEO_GRB + NEO_KHZ800 )
+    , m_saveLoadOffset( saveLoadOffset )
 {
+    readStateFromEEPROM();
     m_stripe.begin();
     setFullRGBColor( 0, 0, 0 );
+    refresh();
 }
 
 void LEDStripe::setFullRGBColor( int r, int g, int b )
@@ -17,6 +22,7 @@ void LEDStripe::setFullRGBColor( int r, int g, int b )
         m_stripe.setPixelColor( i, col );
     }
     m_stripe.show();
+    saveStateToEEPROM();
 }
 
 void LEDStripe::setFullHSVColor( int h, int s, int v )
@@ -30,13 +36,14 @@ void LEDStripe::setRGBColor( int i, int r, int g, int b )
 {
     m_stripe.setPixelColor( i, r, g, b );
     m_stripe.show();
+    saveStateToEEPROM();
 }
 
 void LEDStripe::setHSVColor( int i, int h, int s, int v )
 {
     uint8_t r, g, b;
     HSVtoRGB( h, s, v, r, g, b );
-    m_stripe.setPixelColor( i, r, g, b );
+    setRGBColor( i, r, g, b );
 }
 
 void LEDStripe::setRGBLineColor( int start, int end, int r, int g, int b )
@@ -49,6 +56,7 @@ void LEDStripe::setRGBLineColor( int start, int end, int r, int g, int b )
         m_stripe.setPixelColor( i, col );
     }
     m_stripe.show();
+    saveStateToEEPROM();
 }
 
 void LEDStripe::setHSVLineColor( int start, int end, int h, int s, int v )
@@ -88,11 +96,36 @@ void LEDStripe::addFullHSVColor( int h, int s, int v )
 void LEDStripe::refresh()
 {
     m_stripe.show();
+    saveStateToEEPROM();
 }
 
 int LEDStripe::getNumberOfPixels()
 {
     return m_numPixels;
+}
+
+void LEDStripe::saveStateToEEPROM()
+{
+    //for( int i = 0; i < m_numPixels; ++i )
+    //{
+    //    uint32_t color = m_stripe.getPixelColor( i );
+    //    EEPROM.write( m_saveLoadOffset + i * 3 + 0, ( color | 0x0000FF ) );
+    //    EEPROM.write( m_saveLoadOffset + i * 3 + 1, ( color | 0x00FF00 ) >> 8 );
+    //    EEPROM.write( m_saveLoadOffset + i * 3 + 2, ( color | 0xFF0000 ) >> 16 );
+    //}
+}
+
+void LEDStripe::readStateFromEEPROM()
+{
+    //for( int i = 0; i < m_numPixels; ++i )
+    //{
+    //    uint32_t color = 0;
+    //    color += EEPROM.read( m_saveLoadOffset + i * 3 + 0 );
+    //    color += EEPROM.read( m_saveLoadOffset + i * 3 + 1 ) << 8;
+    //    color += EEPROM.read( m_saveLoadOffset + i * 3 + 2 ) << 16;
+    //    m_stripe.setPixelColor( i, color );
+    //}
+    //m_stripe.show();
 }
 
 void LEDStripe::HSVtoRGB( uint16_t h, uint8_t s, uint8_t v, uint8_t& red, uint8_t& green, uint8_t& blue )
@@ -106,12 +139,12 @@ void LEDStripe::HSVtoRGB( uint16_t h, uint8_t s, uint8_t v, uint8_t& red, uint8_
     switch(hi)
     {
         case(0):
-        case(6): blue = v; green = t; red = p; break;
-        case(1): blue = q; green = v; red = p; break;
-        case(2): blue = p; green = v; red = t; break;
-        case(3): blue = p; green = q; red = v; break;
-        case(4): blue = t; green = p; red = v; break;
-        case(5): blue = v; green = p; red = q; break;
+        case(6): red = v; green = t; blue = p; break;
+        case(1): red = q; green = v; blue = p; break;
+        case(2): red = p; green = v; blue = t; break;
+        case(3): red = p; green = q; blue = v; break;
+        case(4): red = t; green = p; blue = v; break;
+        case(5): red = v; green = p; blue = q; break;
     default:
         blue = 0; green = 0; red = 0; break;
     }

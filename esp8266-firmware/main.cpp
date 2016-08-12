@@ -7,19 +7,34 @@
 #include "CommandInterpreter.h"
 
 #include "StringOperations.h"
+#include "MQTTClient.h"
 
 
 const char* ssid = SSID;
 const char* password = PASSWORD;
 const int tcpPort = 1337;
 
-TCPServer server( tcpPort );
 Wifi wifi;
-LEDStripe stripeOuter( 5, 147 );
-LEDStripe stripeInner( 4, 147 );
+MQTTClient mqttClient( "helium" );
+LEDStripe stripeOuter( 5, 147, 0 );
+LEDStripe stripeInner( 4, 147, 3 * 147 );
 
 CommandInterpreter interpreter( stripeInner,
-                                stripeOuter );
+                                stripeOuter,
+                                10 );
+
+void callback( String& topic, String& message )
+{
+    Serial.print(topic);
+    Serial.print(":");
+    Serial.println(message);
+
+    if( topic == "Netz39/Things/Logouhr/Background/Hue" )
+    {
+        int m = message.toInt();
+        stripeInner.setFullHSVColor( m, 255, 80 );
+    }
+}
 
 void setup()
 {
@@ -33,37 +48,37 @@ void setup()
       for(;;);
   }
 
-  server.start();
+  bool connected = false;
+  //while( !connected )
+  {
+      connected = !mqttClient.connect( "helium", 1883, 5 );
+  }
+  stripeOuter.setFullRGBColor( 0, 80, 0 );
+  mqttClient.setCallback( callback );
+  mqttClient.subscribe( "Netz39/Things/Logouhr/Background/Hue" );
 
   Serial.println("Ready!");
   Serial.print("connect to ");
   Serial.print( wifi.getIP() );
   Serial.print( ":" );
   Serial.println( tcpPort );
+
+  stripeOuter.refresh();
+  stripeInner.refresh();
 }
 
+int i = 0;
 void loop()
 {
     delay( 1 );
-    if( server.clientConnected() )
+    if( mqttClient.isConnected() )
     {
-        //Serial.println("connected.");
-        if( server.dataAvailable()  )
-        {
-            String command = server.getDataUntilCharacter( '\n' );
-            if( command.length() != 0 )
-            {
-                interpreter.interpret( command );
-                // empty buffer
-                server.readData();
-            }
-        }
+        mqttClient.loop();
+        //mqttClient.publish( "Netz39/Things/Logouhr/Background/Hue", "70" );
     }
     else
     {
-        Serial.print("connect to ");
-        Serial.print( wifi.getIP() );
-        Serial.print( ":" );
-        Serial.println( tcpPort );
+        mqttClient.connect( "helium", 1883, 5 );
+        mqttClient.subscribe( "Netz39/Things/Logouhr/Background/Hue" );
     }
 }
