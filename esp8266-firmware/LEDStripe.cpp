@@ -2,13 +2,12 @@
 
 #include <EEPROM.h>
 
-LEDStripe::LEDStripe(int pin, int numPixels , int saveLoadOffset)
-    : m_pin( pin )
-    , m_numPixels( numPixels )
-    , m_stripe( m_numPixels, m_pin, NEO_GRB + NEO_KHZ800 )
-    , m_saveLoadOffset( saveLoadOffset )
+LEDStripe::LEDStripe( Adafruit_NeoPixel& parent, int numPixels )
+    : m_numPixels( numPixels )
+    , m_stripe( parent )
+    //, m_stripe( m_numPixels, m_pin, NEO_GRB + NEO_KHZ800 )
+    , m_saveLoadOffset( 0 )
 {
-    readStateFromEEPROM();
     m_stripe.begin();
     setFullRGBColor( 0, 0, 0 );
     refresh();
@@ -22,7 +21,6 @@ void LEDStripe::setFullRGBColor( int r, int g, int b )
         m_stripe.setPixelColor( i, col );
     }
     m_stripe.show();
-    saveStateToEEPROM();
 }
 
 void LEDStripe::setFullHSVColor( int h, int s, int v )
@@ -36,7 +34,6 @@ void LEDStripe::setRGBColor( int i, int r, int g, int b )
 {
     m_stripe.setPixelColor( i, r, g, b );
     m_stripe.show();
-    saveStateToEEPROM();
 }
 
 void LEDStripe::setHSVColor( int i, int h, int s, int v )
@@ -56,7 +53,6 @@ void LEDStripe::setRGBLineColor( int start, int end, int r, int g, int b )
         m_stripe.setPixelColor( i, col );
     }
     m_stripe.show();
-    saveStateToEEPROM();
 }
 
 void LEDStripe::setHSVLineColor( int start, int end, int h, int s, int v )
@@ -96,36 +92,11 @@ void LEDStripe::addFullHSVColor( int h, int s, int v )
 void LEDStripe::refresh()
 {
     m_stripe.show();
-    saveStateToEEPROM();
 }
 
 int LEDStripe::getNumberOfPixels()
 {
     return m_numPixels;
-}
-
-void LEDStripe::saveStateToEEPROM()
-{
-    //for( int i = 0; i < m_numPixels; ++i )
-    //{
-    //    uint32_t color = m_stripe.getPixelColor( i );
-    //    EEPROM.write( m_saveLoadOffset + i * 3 + 0, ( color | 0x0000FF ) );
-    //    EEPROM.write( m_saveLoadOffset + i * 3 + 1, ( color | 0x00FF00 ) >> 8 );
-    //    EEPROM.write( m_saveLoadOffset + i * 3 + 2, ( color | 0xFF0000 ) >> 16 );
-    //}
-}
-
-void LEDStripe::readStateFromEEPROM()
-{
-    //for( int i = 0; i < m_numPixels; ++i )
-    //{
-    //    uint32_t color = 0;
-    //    color += EEPROM.read( m_saveLoadOffset + i * 3 + 0 );
-    //    color += EEPROM.read( m_saveLoadOffset + i * 3 + 1 ) << 8;
-    //    color += EEPROM.read( m_saveLoadOffset + i * 3 + 2 ) << 16;
-    //    m_stripe.setPixelColor( i, color );
-    //}
-    //m_stripe.show();
 }
 
 void LEDStripe::HSVtoRGB( uint16_t h, uint8_t s, uint8_t v, uint8_t& red, uint8_t& green, uint8_t& blue )
@@ -148,4 +119,43 @@ void LEDStripe::HSVtoRGB( uint16_t h, uint8_t s, uint8_t v, uint8_t& red, uint8_
     default:
         blue = 0; green = 0; red = 0; break;
     }
+}
+
+LEDStripeSnippet::LEDStripeSnippet( Adafruit_NeoPixel& parent, int begin, int numPixels )
+    : LEDStripe( parent, numPixels )
+    , m_addressOffset( begin )
+{
+
+}
+
+void LEDStripeSnippet::setFullRGBColor( int r, int g, int b )
+{
+    uint32_t col = m_stripe.Color( r, g, b );
+    for( int i = m_addressOffset; i < m_addressOffset+m_numPixels; ++i )
+    {
+        m_stripe.setPixelColor( i, col );
+    }
+    m_stripe.show();
+}
+
+void LEDStripeSnippet::setRGBColor( int i, int r, int g, int b )
+{
+    LEDStripe::setRGBColor( i + m_addressOffset, r, g, b );
+}
+
+void LEDStripeSnippet::setRGBLineColor( int start, int end, int r, int g, int b )
+{
+    LEDStripe::setRGBLineColor( start + m_addressOffset, end + m_addressOffset, r, g, b );
+}
+
+void LEDStripeSnippet::addRGBColor( int i, int r, int g, int b )
+{
+    LEDStripe::addRGBColor( i + m_addressOffset, r, g, b );
+}
+
+void LEDStripeSnippet::addFullRGBColor( int r, int g, int b )
+{
+    uint32_t col = m_stripe.Color( r, g, b );
+    for( int i = m_addressOffset; i < m_addressOffset + m_numPixels; ++i )
+        m_stripe.setPixelColor( i, col );
 }

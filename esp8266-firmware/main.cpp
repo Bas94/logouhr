@@ -16,8 +16,9 @@ const int tcpPort = 1337;
 
 Wifi wifi;
 MQTTClient mqttClient( "helium" );
-LEDStripe stripeOuter( 5, 147, 0 );
-LEDStripe stripeInner( 4, 147, 3 * 147 );
+Adafruit_NeoPixel stripe( 294, 4, NEO_GRB + NEO_KHZ800 );
+LEDStripeSnippet stripeInner( stripe, 0, 131 );
+LEDStripeSnippet stripeOuter( stripe, 131, 146 );
 
 CommandInterpreter interpreter( stripeInner,
                                 stripeOuter,
@@ -29,11 +30,7 @@ void callback( String& topic, String& message )
     Serial.print(":");
     Serial.println(message);
 
-    if( topic == "Netz39/Things/Logouhr/Background/Hue" )
-    {
-        int m = message.toInt();
-        stripeInner.setFullHSVColor( m, 255, 80 );
-    }
+    interpreter.interpret( topic, message );
 }
 
 void setup()
@@ -55,7 +52,8 @@ void setup()
   }
   stripeOuter.setFullRGBColor( 0, 80, 0 );
   mqttClient.setCallback( callback );
-  mqttClient.subscribe( "Netz39/Things/Logouhr/Background/Hue" );
+  mqttClient.subscribe( "Netz39/Things/Logouhr/#" );
+  mqttClient.subscribe( "Netz39/Service/Clock/Wallclock/Simple/#" );
 
   Serial.println("Ready!");
   Serial.print("connect to ");
@@ -74,11 +72,11 @@ void loop()
     if( mqttClient.isConnected() )
     {
         mqttClient.loop();
-        //mqttClient.publish( "Netz39/Things/Logouhr/Background/Hue", "70" );
     }
     else
     {
         mqttClient.connect( "helium", 1883, 5 );
-        mqttClient.subscribe( "Netz39/Things/Logouhr/Background/Hue" );
+        mqttClient.subscribe( "Netz39/Things/Logouhr/#" );
+        mqttClient.subscribe( "Netz39/Service/Clock/Wallclock/Simple/#" );
     }
 }

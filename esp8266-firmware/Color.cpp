@@ -24,4 +24,80 @@ namespace ColorOp
         }
     }
 
+    Color HSVtoRGB( ColorHSV const & col )
+    {
+        Color c;
+        HSVtoRGB( col.h, col.s, col.v, c.r, c.g, c.b );
+        return c;
+    }
+
+    void RGBtoHSV(uint8_t red, uint8_t green, uint8_t blue, uint16_t &h, uint8_t &s, uint8_t &v)
+    {
+        uint8_t maxVal = max( red, max( green, blue ) );
+        uint8_t minVal = min( red, min( green, blue ) );
+        if( maxVal == minVal )
+            h = 0;
+        else if( maxVal == red )
+            h = 60 * ( 0 + ( green - blue  ) / ( maxVal - minVal ) );
+        else if( maxVal == green )
+            h = 60 * ( 2 + ( blue  - red   ) / ( maxVal - minVal ) );
+        else if( maxVal == blue )
+            h = 60 * ( 4 + ( red   - green ) / ( maxVal - minVal ) );
+
+        if( h < 0 )
+            h += 360;
+
+        if( maxVal == 0 )
+            s = 0;
+        else
+            s = ( maxVal - minVal ) / maxVal;
+
+        v = maxVal;
+    }
+
+    ColorHSV RGBtoHSV( Color const & col )
+    {
+        ColorHSV c;
+        RGBtoHSV( col.r, col.g, col.b, c.h, c.s, c.v );
+        return c;
+    }
+
 } // namespace ColorOp
+
+Color::Color()
+    : data( 0 )
+{
+
+}
+
+Color::Color( uint8_t red, uint8_t green, uint8_t blue )
+    : r( red )
+    , g( green )
+    , b( blue )
+{
+
+}
+
+Color Color::operator=( ColorHSV const & rhs )
+{
+    return ColorOp::HSVtoRGB( rhs );
+}
+
+ColorHSV::ColorHSV()
+    : data( 0 )
+{
+
+}
+
+ColorHSV::ColorHSV( uint16_t hue, uint8_t saturation, uint8_t value )
+    : h( hue )
+    , s( saturation )
+    , v( value )
+{
+
+}
+
+ColorHSV ColorHSV::operator=( Color const & rhs )
+{
+    return ColorOp::RGBtoHSV( rhs );
+}

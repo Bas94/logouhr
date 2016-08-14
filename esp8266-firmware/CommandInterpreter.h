@@ -31,41 +31,22 @@ class CommandInterpreter
 public:
     CommandInterpreter( LEDStripe& LEDStripeInner,
                         LEDStripe& LEDStripeOuter,
-                        int minimalOutput = 30 );
+                        int minimalOutput = 10 );
     ~CommandInterpreter();
 
-    void interpret( String const & command );
+    void interpret( String const & topic, const String &message );
 
 private:
 
-    void clockHand( LEDStripe& stripe, int value, Color color, int max );
+    void messageToHSVColor( String const & valueName, String const & message, ColorHSV& color );
+    void clockHand( LEDStripe& stripe, int value, ColorHSV color, int max );
 
     void updatePixels();
 
-    void parseColorRGB( String& arguments, Color& color );
-    void parseColorHSV( String& arguments, Color& color );
+    void parseColorRGB( String& arguments, ColorHSV& color );
+    void parseColorHSV( String& arguments, ColorHSV& color );
 
-    void setMode( String& arguments );
-    void setTime( String& arguments );
-    void setHourRGBColor( String& arguments );
-    void setMinuteRGBColor( String& arguments );
-    void setSecondRGBColor( String& arguments );
-    void setHourHSVColor( String& arguments );
-    void setMinuteHSVColor( String& arguments );
-    void setSecondHSVColor( String& arguments );
-    void setBackgroundRGBColor( String& arguments );
-    void setBackgroundHSVColor( String& arguments );
-
-    void setFullRGBColor( String& arguments );
-    void setFullHSVColor( String& arguments );
-
-    void fillRGBRow( String& arguments );
-    void fillHSVRow( String& arguments );
-
-    void setRGBPixel( String& arguments );
-    void setHSVPixel( String& arguments );
-
-    void setStripe( String& arguments );
+    void setMode( String const & arguments );
 
     enum LogoMode
     {
@@ -88,12 +69,12 @@ private:
     int m_minute;
     int m_second;
 
-    Color m_hourColor;
-    Color m_minuteColor;
-    Color m_secondColor;
+    ColorHSV m_hourColor;
+    ColorHSV m_minuteColor;
+    ColorHSV m_secondColor;
 
-    Color m_backgroundColorInner;
-    Color m_backgroundColorOuter;
+    ColorHSV m_backgroundColorInner;
+    ColorHSV m_backgroundColorOuter;
 
     int m_hourWidth;
     int m_minuteWidth;

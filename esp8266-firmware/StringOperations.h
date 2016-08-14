@@ -8,6 +8,8 @@ namespace strOp
 
     void split( String& str1, String& str2, char splitChar );
     void split( String const & input, String& str1, String& str2, char splitChar );
+    void splitFromEnd( String& str1, String& str2, char splitChar );
+    void splitFromEnd( String const & input, String& str1, String& str2, char splitChar );
 
     void parseInput( String input, int& red, int& green, int& blue );
 }

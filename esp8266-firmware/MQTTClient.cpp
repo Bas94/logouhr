@@ -3,8 +3,6 @@
 #include "Wifi.h"
 #include "WifiLogin.h"
 
-IPAddress serverIP(172,23,52,27);
-
 void(*m_callback_t)( String&, String& ) = 0;
 
 void callback(const MQTT::Publish& publish)
@@ -17,7 +15,7 @@ void callback(const MQTT::Publish& publish)
 
 
 MQTTClient::MQTTClient( String server )
-    : m_client( m_espClient, serverIP )
+    : m_client( m_espClient, "helium" )
 {
 
 }
