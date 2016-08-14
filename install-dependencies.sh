@@ -8,5 +8,10 @@ cd libraries
 git clone https://github.com/adafruit/Adafruit_NeoPixel.git
 cd Adafruit_NeoPixel
 git checkout v1.0.6
+cd ..
+git clone https://github.com/Imroy/pubsubclient PubSubClient
+cd PubSubClient
+git checkout 11fd8d0993a2c0f7961805df638d8a8c21b1eacc
+mv src/* .
 cd ../../..
 git clone https://github.com/themadinventor/esptool.git
