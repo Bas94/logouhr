@@ -17,11 +17,11 @@ CommandInterpreter::CommandInterpreter( LEDStripe& LEDStripeInner,
     , m_secondWidth( 2 )
     , m_minimalOutput( minimalOutput )
 {
-    m_hourColor = ColorHSV( 240, 255, 80 );
+    m_hourColor = ColorHSV( 240, 255, 255 );
 
-    m_minuteColor = ColorHSV( 120, 255, 80 );
+    m_minuteColor = ColorHSV( 120, 255, 255 );
 
-    m_secondColor = ColorHSV( 0, 255, 80 );
+    m_secondColor = ColorHSV( 0, 255, 255 );
 
     m_backgroundColorOuter = ColorHSV( 0, 0, 50 );
 
@@ -55,7 +55,7 @@ void CommandInterpreter::interpret( String const & topic, String const & message
     else if( valuePath.equals( "Netz39/Things/Logouhr/Background" ) )
     {
         messageToHSVColor( valueName, message, m_backgroundColorOuter );
-        m_backgroundColorOuter.v = min( max( m_backgroundColorOuter.v, 1 ), 4 ) * 255 / 4;
+        //m_backgroundColorOuter.v = static_cast<int>( min( max( m_backgroundColorOuter.v, 1 ), 4 ) ) * 255 / 4;
         m_backgroundColorInner = m_backgroundColorOuter;
     }
     else if( valuePath.equals( "Netz39/Things/Logouhr/HourHand" ) )
@@ -99,6 +99,11 @@ void CommandInterpreter::messageToHSVColor(const String &valueName, const String
 
 void CommandInterpreter::clockHand( LEDStripe& stripe, int value, ColorHSV color, int max )
 {
+   // stripe.addHSVColor( value * stripe.getNumberOfPixels() / max,
+   //                     static_cast<int>( color.h ),
+   //                     static_cast<int>( color.s ),
+   //                     static_cast<int>( color.v ) );
+
     float hPercent = static_cast<float>( value % max ) / max;
     float hfPos = stripe.getNumberOfPixels() * hPercent;
     int hPosHalf1 = static_cast<int>( hfPos );
@@ -107,7 +112,7 @@ void CommandInterpreter::clockHand( LEDStripe& stripe, int value, ColorHSV color
     stripe.addHSVColor( hPosHalf1,
                         static_cast<int>( color.h ),
                         static_cast<int>( color.s ),
-                        static_cast<int>( half1perc * color.v ) );
+                        static_cast<int>( color.v ) );
 
     if( half1perc < 1.0f )
     {
@@ -117,7 +122,7 @@ void CommandInterpreter::clockHand( LEDStripe& stripe, int value, ColorHSV color
         stripe.addHSVColor( hPosHalf2,
                             static_cast<int>( color.h ),
                             static_cast<int>( color.s ),
-                            static_cast<int>( half2perc * color.v ) );
+                            static_cast<int>( color.v ) );
     }
 }
 
@@ -137,7 +142,7 @@ void CommandInterpreter::updatePixels()
         // minutes
         clockHand( m_LEDStripeOuter,
                    m_minute,
-                   m_minuteColor,
+                   ColorHSV( 100, 255, 255 ), //m_minuteColor,
                    60 );
 
         // seconds
@@ -148,50 +153,9 @@ void CommandInterpreter::updatePixels()
 
         m_LEDStripeInner.refresh();
         m_LEDStripeOuter.refresh();
-
     }
     else if( m_mode == LogoModeGeneric )
     {
-    }
-}
-
-void CommandInterpreter::parseColorRGB( String& arguments, ColorHSV &color )
-{
-    String r,g,b;
-    strOp::split( arguments, r, arguments, ' ' );
-    strOp::split( arguments, g, b, ' ' );
-
-    if( r.length() > 0 &&
-        g.length() > 0 &&
-        b.length() > 0 )
-    {
-        color = Color( r.toInt(), g.toInt(), b.toInt() );
-    }
-
-    if( color.v < m_minimalOutput )
-    {
-        color.v = m_minimalOutput;
-    }
-}
-
-void CommandInterpreter::parseColorHSV( String& arguments, ColorHSV& color )
-{
-    String h,s,v;
-    strOp::split( arguments, h, arguments, ' ' );
-    strOp::split( arguments, s, v, ' ' );
-
-    if( h.length() > 0 &&
-        s.length() > 0 &&
-        v.length() > 0 )
-    {
-        color.h = h.toInt();
-        color.s = s.toInt();
-        color.v = v.toInt();
-    }
-
-    if( color.v < m_minimalOutput )
-    {
-        color.v = m_minimalOutput;
     }
 }
 

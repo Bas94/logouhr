@@ -26,9 +26,9 @@ CommandInterpreter interpreter( stripeInner,
 
 void callback( String& topic, String& message )
 {
-    Serial.print(topic);
-    Serial.print(":");
-    Serial.println(message);
+    //Serial.print(topic);
+    //Serial.print(":");
+    //Serial.println(message);
 
     interpreter.interpret( topic, message );
 }
@@ -54,12 +54,6 @@ void setup()
   mqttClient.setCallback( callback );
   mqttClient.subscribe( "Netz39/Things/Logouhr/#" );
   mqttClient.subscribe( "Netz39/Service/Clock/Wallclock/Simple/#" );
-
-  Serial.println("Ready!");
-  Serial.print("connect to ");
-  Serial.print( wifi.getIP() );
-  Serial.print( ":" );
-  Serial.println( tcpPort );
 
   stripeOuter.refresh();
   stripeInner.refresh();

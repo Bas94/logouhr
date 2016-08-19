@@ -43,9 +43,6 @@ private:
 
     void updatePixels();
 
-    void parseColorRGB( String& arguments, ColorHSV& color );
-    void parseColorHSV( String& arguments, ColorHSV& color );
-
     void setMode( String const & arguments );
 
     enum LogoMode

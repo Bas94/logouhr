@@ -5,7 +5,6 @@
 LEDStripe::LEDStripe( Adafruit_NeoPixel& parent, int numPixels )
     : m_numPixels( numPixels )
     , m_stripe( parent )
-    //, m_stripe( m_numPixels, m_pin, NEO_GRB + NEO_KHZ800 )
     , m_saveLoadOffset( 0 )
 {
     m_stripe.begin();

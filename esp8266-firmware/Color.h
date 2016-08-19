@@ -17,7 +17,9 @@ union Color{
 
     Color();
     Color( uint8_t red, uint8_t green, uint8_t blue );
-    Color operator=( ColorHSV const & rhs );
+    Color( Color const & color );
+    Color& operator=( ColorHSV const & rhs );
+    Color& operator=( Color const & rhs );
 };
 
 union ColorHSV{
@@ -31,7 +33,9 @@ union ColorHSV{
 
     ColorHSV();
     ColorHSV( uint16_t hue, uint8_t saturation, uint8_t value );
-    ColorHSV operator=( Color const & rhs );
+    ColorHSV( ColorHSV const & color );
+    ColorHSV& operator=( Color const & rhs );
+    ColorHSV& operator=( ColorHSV const & rhs );
 };
 
 namespace ColorOp

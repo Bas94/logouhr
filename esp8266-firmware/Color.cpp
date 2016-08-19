@@ -67,7 +67,6 @@ namespace ColorOp
 Color::Color()
     : data( 0 )
 {
-
 }
 
 Color::Color( uint8_t red, uint8_t green, uint8_t blue )
@@ -75,18 +74,32 @@ Color::Color( uint8_t red, uint8_t green, uint8_t blue )
     , g( green )
     , b( blue )
 {
-
 }
 
-Color Color::operator=( ColorHSV const & rhs )
+Color::Color( const Color &color )
+    : r( color.r )
+    , g( color.g )
+    , b( color.b )
 {
-    return ColorOp::HSVtoRGB( rhs );
+}
+
+Color& Color::operator=( ColorHSV const & rhs )
+{
+    *this = ColorOp::HSVtoRGB( rhs );
+    return *this;
+}
+
+Color& Color::operator=( Color const & rhs )
+{
+    this->r = rhs.r;
+    this->g = rhs.g;
+    this->b = rhs.b;
+    return *this;
 }
 
 ColorHSV::ColorHSV()
     : data( 0 )
 {
-
 }
 
 ColorHSV::ColorHSV( uint16_t hue, uint8_t saturation, uint8_t value )
@@ -94,10 +107,25 @@ ColorHSV::ColorHSV( uint16_t hue, uint8_t saturation, uint8_t value )
     , s( saturation )
     , v( value )
 {
-
 }
 
-ColorHSV ColorHSV::operator=( Color const & rhs )
+ColorHSV::ColorHSV( const ColorHSV &color )
+    : h( color.h )
+    , s( color.s )
+    , v( color.v )
 {
-    return ColorOp::RGBtoHSV( rhs );
+}
+
+ColorHSV& ColorHSV::operator=( Color const & rhs )
+{
+    *this = ColorOp::RGBtoHSV( rhs );
+    return *this;
+}
+
+ColorHSV& ColorHSV::operator=( const ColorHSV &rhs )
+{
+    this->h = rhs.h;
+    this->s = rhs.s;
+    this->v = rhs.v;
+    return *this;
 }
