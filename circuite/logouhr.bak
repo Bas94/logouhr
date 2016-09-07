@@ -29,6 +29,7 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:ESP8266
+LIBS:logouhr-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -216,7 +217,7 @@ Wire Wire Line
 Connection ~ 6800 2550
 Text GLabel 10150 2150 0    60   Input ~ 0
 230V1-In
-Text GLabel 10650 2150 0    60   Input ~ 0
+Text GLabel 10700 2150 0    60   Input ~ 0
 230V2-In
 Wire Wire Line
 	10150 2150 10150 2400
@@ -224,12 +225,6 @@ Wire Wire Line
 	10150 2400 9850 2400
 Wire Wire Line
 	9850 2400 9850 2650
-Wire Wire Line
-	10650 2150 10650 2500
-Wire Wire Line
-	10650 2500 10150 2500
-Wire Wire Line
-	10150 2500 10150 2650
 Wire Wire Line
 	8250 1300 8500 1300
 Wire Wire Line
@@ -243,7 +238,7 @@ L D D?
 U 1 1 57B8E74F
 P 9450 2300
 F 0 "D?" H 9450 2400 50  0000 C CNN
-F 1 "D" H 9450 2200 50  0000 C CNN
+F 1 "1N4148" H 9450 2200 50  0000 C CNN
 F 2 "" H 9450 2300 50  0000 C CNN
 F 3 "" H 9450 2300 50  0000 C CNN
 	1    9450 2300
@@ -277,14 +272,69 @@ Wire Wire Line
 	1650 950  1800 950 
 Wire Wire Line
 	1800 1350 1300 1350
-Text GLabel 8500 3450 0    60   Input ~ 0
+Text GLabel 8500 3450 2    60   Output ~ 0
 LED-Signal
-Text GLabel 9000 3800 0    60   Input ~ 0
+Text GLabel 9000 3800 0    60   Output ~ 0
 230V1-Out
-Text GLabel 9000 3950 0    60   Input ~ 0
+Text GLabel 9000 3950 0    60   Output ~ 0
 230V2-Out
 Wire Wire Line
 	10050 3450 10050 3950
 Wire Wire Line
 	10050 3950 9000 3950
+Wire Wire Line
+	10150 2650 10700 2650
+Wire Wire Line
+	10700 2650 10700 2150
+Text Label 5250 2550 0    60   ~ 0
+GND
+Text Label 5250 1200 0    60   ~ 0
+VCC
+$Comp
+L CONN_01X03 P?
+U 1 1 57D03E64
+P 7450 3450
+F 0 "P?" H 7450 3650 50  0000 C CNN
+F 1 "CONN_01X03" V 7550 3450 50  0000 C CNN
+F 2 "" H 7450 3450 50  0000 C CNN
+F 3 "" H 7450 3450 50  0000 C CNN
+	1    7450 3450
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	8500 3450 7650 3450
+Text Label 7650 3350 0    60   ~ 0
+GND
+Text Label 7650 3550 0    60   ~ 0
+5V12A
+$Comp
+L CONN_01X03 P?
+U 1 1 57D04591
+P 7450 3950
+F 0 "P?" H 7450 4150 50  0000 C CNN
+F 1 "CONN_01X03" V 7550 3950 50  0000 C CNN
+F 2 "" H 7450 3950 50  0000 C CNN
+F 3 "" H 7450 3950 50  0000 C CNN
+	1    7450 3950
+	1    0    0    -1  
+$EndComp
+Text GLabel 7250 3850 0    60   Input ~ 0
+230V1-In
+Text GLabel 7250 4050 0    60   Input ~ 0
+230V2-In
+$Comp
+L CONN_01X03 P?
+U 1 1 57D04700
+P 7450 4400
+F 0 "P?" H 7450 4600 50  0000 C CNN
+F 1 "CONN_01X03" V 7550 4400 50  0000 C CNN
+F 2 "" H 7450 4400 50  0000 C CNN
+F 3 "" H 7450 4400 50  0000 C CNN
+	1    7450 4400
+	1    0    0    -1  
+$EndComp
+Text GLabel 7250 4300 0    60   Output ~ 0
+230V2-Out
+Text GLabel 7250 4500 0    60   Output ~ 0
+230V2-Out
 $EndSCHEMATC
